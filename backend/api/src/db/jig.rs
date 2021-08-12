@@ -113,6 +113,7 @@ r#"
 select
     id as "id: JigId",
     display_name,
+    play_count,
     creator_id,
     author_id,
     publish_at,
@@ -150,6 +151,7 @@ order by t.ord
         .map(|row| Jig {
             id: row.id,
             display_name: row.display_name,
+            play_count: row.play_count,
             modules: row
                 .modules
                 .into_iter()
@@ -203,6 +205,7 @@ pub async fn get(pool: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
 select  
     id as "id: JigId",
     display_name,
+    play_count,
     creator_id,
     author_id,
     publish_at,
@@ -238,6 +241,7 @@ where id = $1"#,
         .map(|row| Jig {
             id: row.id,
             display_name: row.display_name,
+            play_count: row.play_count,
             language: row.language,
             modules: row
                 .modules
@@ -468,6 +472,7 @@ pub async fn list(
 select  
     id as "id: JigId",
     display_name,
+    play_count,
     creator_id,
     author_id,
     publish_at,
@@ -510,6 +515,7 @@ limit 20 offset 20 * $2
         .map_ok(|row| Jig {
             id: row.id,
             display_name: row.display_name,
+            play_count: row.play_count,
             language: row.language,
             modules: row
                 .modules
@@ -912,13 +918,22 @@ where id = $4
     Ok(())
 }
 
-pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
+pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<()> {
     let mut transaction = db.begin().await?;
 
-    let jig = get(db, id).await?.unwrap();
-
     //get the play_count from the jig and add 1
-    let play_count = jig.play_count + 1;
+    let play_count_query = sqlx::query!(
+    r#"
+        select play_count
+        from jig
+        where id = $1
+    "#,
+        id.0,
+    )
+    .fetch_one(db)
+    .await?;
+
+    let play_count = play_count_query + 1;
 
     let increase_count = sqlx::query!(
         r#"
