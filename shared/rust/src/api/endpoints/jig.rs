@@ -3,7 +3,7 @@ use crate::{
     domain::{
         jig::{
             JigBrowseQuery, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigId,
-            JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateRequest,
+            JigResponse, JigSearchQuery, JigSearchResponse, JigUpdateRequest, JigPlayCountResponse,
         },
         CreateResponse,
     },
@@ -137,14 +137,14 @@ impl ApiEndpoint for Count {
     const METHOD: Method = Method::Get;
 }
 
-/// Count of public and published JIGs.
+/// Count of numner of times a JIG was played.
 ///
 /// # Authorization
 /// * None
 pub struct PlayCount;
 impl ApiEndpoint for PlayCount {
     type Req = ();
-    type Res = ();
+    type Res = JigPlayCountResponse;
     type Err = EmptyError;
     const PATH: &'static str = "/v1/jig/{id}/view";
     const METHOD: Method = Method::Post;

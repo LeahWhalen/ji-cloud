@@ -918,13 +918,13 @@ where id = $4
     Ok(())
 }
 
-pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<()> {
+pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<i64> {
     let mut transaction = db.begin().await?;
 
     //get the play_count from the jig and add 1
-    let play_count_query = sqlx::query!(
+    let jig = sqlx::query!(
     r#"
-        select play_count
+        select *
         from jig
         where id = $1
     "#,
@@ -933,9 +933,9 @@ pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<()> {
     .fetch_one(db)
     .await?;
 
-    let play_count = play_count_query + 1;
+    let play_count = jig.play_count + 1;
 
-    let increase_count = sqlx::query!(
+    sqlx::query!(
         r#"
 update jig
 set play_count = $2
@@ -947,7 +947,7 @@ where id = $1
     .execute(&mut transaction)
     .await?;
 
-    Ok(())
+    Ok(play_count)
 }
 
 /////////
