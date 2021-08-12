@@ -3,6 +3,7 @@ create table jig (
     display_name text          not null,
     cover        jsonb         not null,
     ending       jsonb         not null,
+    play_count   bigint        not null default 0,
     -- The difference between the creator and the author is that the *creator* cannot be changed, and is a bit of record keeping.
     -- A author is the person currently in charge of the jig, whereas the creator is the person who was *originally* responsible for it.
     creator_id   uuid references "user" (id) on delete set null,
