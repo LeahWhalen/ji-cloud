@@ -329,5 +329,6 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
         .route(
             jig::draft::Publish::PATH,
             jig::draft::Publish::METHOD.route().to(publish_draft),
-        );
+        )
+        .route(jig::Count::PATH, jig::Count::METHOD.route().to(play_count));
 }
