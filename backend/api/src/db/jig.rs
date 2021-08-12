@@ -912,6 +912,29 @@ where id = $4
     Ok(())
 }
 
+pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
+    let mut transaction = db.begin().await?;
+
+    let jig = get(db, id).await?.unwrap();
+
+    //get the play_count from the jig and add 1
+    let play_count = jig.play_count + 1;
+
+    let increase_count = sqlx::query!(
+        r#"
+update jig
+set play_count = $2
+where id = $1
+            "#,
+        id.0,
+        play_count,
+    )
+    .execute(&mut transaction)
+    .await?;
+
+    Ok(())
+}
+
 /////////
 // Auth based on user scope or jig association
 

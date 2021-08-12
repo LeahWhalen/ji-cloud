@@ -145,6 +145,9 @@ pub struct Jig {
     /// The JIG's name.
     pub display_name: String,
 
+    // The number of times a JIG has been played
+    pub play_count: Option<i32>,
+
     /// The JIG's remaining modules.
     pub modules: Vec<LiteModule>,
 
