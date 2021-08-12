@@ -516,4 +516,12 @@ pub struct JigCountResponse {
     pub total_count: u64,
 }
 
+/// Response for total play count of a jig.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct JigPlayCountResponse {
+    /// Total number of times a jig was played.
+    pub play_count: i64,
+}
+
 into_uuid![JigId];
