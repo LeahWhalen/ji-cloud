@@ -10,7 +10,7 @@ use shared::{
     domain::{
         jig::{
             Jig, JigBrowseResponse, JigCountResponse, JigCreateRequest, JigDraftResponse, JigId,
-            JigResponse, JigSearchResponse, UserOrMe, JigPlayCountResponse,
+            JigResponse, JigSearchResponse, UserOrMe,
         },
         CreateResponse,
     },
@@ -289,10 +289,10 @@ async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res
 async fn play_count(
     db: Data<PgPool>,
     path: web::Path<JigId>,
-) -> Result<Json<<jig::PlayCount as ApiEndpoint>::Res>, error::Server> {
-    let play_count = db::jig::increase_play_count(&*db, path.into_inner()).await?;
+) -> Result<NoContent, error::Delete>  {
+    db::jig::increase_play_count(&*db, path.into_inner()).await?;
 
-    Ok(Json(JigPlayCountResponse { play_count }))
+    Ok(NoContent)
 }
 
 pub fn configure(cfg: &mut ServiceConfig<'_>) {
@@ -330,5 +330,5 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
             jig::draft::Publish::PATH,
             jig::draft::Publish::METHOD.route().to(publish_draft),
         )
-        .route(jig::Count::PATH, jig::Count::METHOD.route().to(play_count));
+        .route(jig::PlayCount::PATH, jig::PlayCount::METHOD.route().to(play_count));
 }
