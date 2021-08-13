@@ -8,6 +8,7 @@ expression: body
     {
       "id": "0cc084bc-7c83-11eb-9f77-e3218dffb008",
       "display_name": "",
+      "play_count": 0,
       "modules": [
         {
           "id": "0cbfdd82-7c83-11eb-9f77-d7d86264c3bc",
@@ -53,6 +54,7 @@ expression: body
     {
       "id": "3a71522a-cd77-11eb-8dc1-af3e35f7c743",
       "display_name": "",
+      "play_count": 0,
       "modules": [],
       "age_ranges": [],
       "affiliations": [],
@@ -82,6 +84,7 @@ expression: body
     {
       "id": "bdc17474-d4a8-11eb-b8bc-0242ac130003",
       "display_name": "",
+      "play_count": 0,
       "modules": [],
       "age_ranges": [],
       "affiliations": [],
@@ -111,6 +114,7 @@ expression: body
     {
       "id": "ce4edd68-d4a8-11eb-b8bc-0242ac130003",
       "display_name": "",
+      "play_count": 0,
       "modules": [],
       "age_ranges": [],
       "affiliations": [],

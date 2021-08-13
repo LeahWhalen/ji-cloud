@@ -297,20 +297,13 @@ async fn count_play() -> anyhow::Result<()> {
             port
         ))
         .login()
-        .json(&json!({
-          "play_count": 5,
-        }))
         .send()
         .await?
         .error_for_status()?;
 
-    assert_eq!(resp.status(), StatusCode::OK);
-
-    let body: serde_json::Value = resp.json().await?;
+    assert_eq!(resp.status(), StatusCode::NO_CONTENT);
 
     app.stop(false).await;
-
-    insta::assert_json_snapshot!(body);
 
     Ok(())
 }

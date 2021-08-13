@@ -918,36 +918,29 @@ where id = $4
     Ok(())
 }
 
-pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<i64> {
+pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<()> {
     let mut transaction = db.begin().await?;
 
-    //get the play_count from the jig and add 1
-    let jig = sqlx::query!(
-    r#"
-        select *
-        from jig
-        where id = $1
-    "#,
-        id.0,
-    )
-    .fetch_one(db)
-    .await?;
+    //deal with mutliple routes updating jig:
+    //  block database access in postgresql (block a specific column)
+    //  prefer handling actual update in sql -> put it in the database
+    //  returns nothing instead
 
-    let play_count = jig.play_count + 1;
 
     sqlx::query!(
+    // language=SQL
         r#"
 update jig
-set play_count = $2
+set play_count = play_count + 1
 where id = $1
+returning play_count;
             "#,
         id.0,
-        play_count,
     )
-    .execute(&mut transaction)
+    .fetch_one(&mut transaction)
     .await?;
 
-    Ok(play_count)
+    Ok(())
 }
 
 /////////
