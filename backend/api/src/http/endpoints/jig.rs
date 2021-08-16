@@ -286,10 +286,7 @@ async fn count(db: Data<PgPool>) -> Result<Json<<jig::Count as ApiEndpoint>::Res
 
 /// Post an increase in the number of times a jig was played
 #[api_v2_operation]
-async fn play_count(
-    db: Data<PgPool>,
-    path: web::Path<JigId>,
-) -> Result<NoContent, error::Delete>  {
+async fn play_count(db: Data<PgPool>, path: web::Path<JigId>) -> Result<NoContent, error::Delete> {
     db::jig::increase_play_count(&*db, path.into_inner()).await?;
 
     Ok(NoContent)
@@ -330,5 +327,8 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
             jig::draft::Publish::PATH,
             jig::draft::Publish::METHOD.route().to(publish_draft),
         )
-        .route(jig::PlayCount::PATH, jig::PlayCount::METHOD.route().to(play_count));
+        .route(
+            jig::PlayCount::PATH,
+            jig::PlayCount::METHOD.route().to(play_count),
+        );
 }
