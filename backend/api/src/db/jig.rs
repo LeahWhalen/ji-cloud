@@ -83,6 +83,18 @@ values ($1, $2, $3, $4)"#,
         .await?;
     }
 
+    // todo add play_count table
+    sqlx::query!(
+        // language=SQL
+        r#"
+insert into play_count (jig_id, play_count)
+values ($1, 0)
+        "#,
+        jig.id
+    )
+    .execute(&mut transaction)
+    .await?;
+
     transaction.commit().await?;
 
     Ok(JigId(jig.id))
@@ -113,7 +125,6 @@ r#"
 select
     id as "id: JigId",
     display_name,
-    play_count,
     creator_id,
     author_id,
     publish_at,
@@ -151,7 +162,6 @@ order by t.ord
         .map(|row| Jig {
             id: row.id,
             display_name: row.display_name,
-            play_count: row.play_count,
             modules: row
                 .modules
                 .into_iter()
@@ -205,7 +215,6 @@ pub async fn get(pool: &PgPool, id: JigId) -> anyhow::Result<Option<Jig>> {
 select  
     id as "id: JigId",
     display_name,
-    play_count,
     creator_id,
     author_id,
     publish_at,
@@ -241,7 +250,6 @@ where id = $1"#,
         .map(|row| Jig {
             id: row.id,
             display_name: row.display_name,
-            play_count: row.play_count,
             language: row.language,
             modules: row
                 .modules
@@ -472,7 +480,6 @@ pub async fn list(
 select  
     id as "id: JigId",
     display_name,
-    play_count,
     creator_id,
     author_id,
     publish_at,
@@ -515,7 +522,6 @@ limit 20 offset 20 * $2
         .map_ok(|row| Jig {
             id: row.id,
             display_name: row.display_name,
-            play_count: row.play_count,
             language: row.language,
             modules: row
                 .modules
@@ -921,18 +927,12 @@ where id = $4
 pub async fn increase_play_count(db: &PgPool, id: JigId) -> anyhow::Result<()> {
     let mut transaction = db.begin().await?;
 
-    //deal with mutliple routes updating jig:
-    //  block database access in postgresql (block a specific column)
-    //  prefer handling actual update in sql -> put it in the database
-    //  returns nothing instead
-
-
     sqlx::query!(
-    // language=SQL
+        // language=SQL
         r#"
-update jig
+update play_count
 set play_count = play_count + 1
-where id = $1
+where jig_id = $1
 returning play_count;
             "#,
         id.0,

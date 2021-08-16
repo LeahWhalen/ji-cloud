@@ -7,7 +7,6 @@ expression: body
   "jig": {
     "id": "[id]",
     "display_name": "",
-    "play_count": 0,
     "modules": [
       {
         "id": "[id]",
