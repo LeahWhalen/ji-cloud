@@ -28,7 +28,7 @@ note: no redis necessary for this API
 
 run sqlx database (from api folder, run this command)
 ```bash
-sqlx db migrate run
+sqlx migrate run
 ```
 
 ##Reset database
@@ -50,6 +50,6 @@ docker run --name postgres12 --tmpfs /var/lib/postgresql/data -p 5432:5432 -e PO
 To run tests:
 ```bash
 export DATABASE_URL=postgres://postgres:password@localhost/
-sqlx db migrate run
+sqlx migrate run
 cargo test
 ```
