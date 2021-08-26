@@ -78,3 +78,11 @@ pub struct JigPlayerSession {
     /// Settings for the player session.
     pub settings: JigPlayerSettings,
 }
+
+/// Response for creating a session for a jig play as a player
+#[derive(Serialize, Deserialize, Debug)]
+#[cfg_attr(feature = "backend", derive(Apiv2Schema))]
+pub struct JigPlayerSessionToken {
+    /// Token that will be passed to confirm a jig was played all the way through
+    pub token: String,
+}

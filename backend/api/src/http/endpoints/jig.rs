@@ -310,6 +310,12 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
             jig::player::Create::METHOD.route().to(player::create),
         )
         .route(
+            jig::player::CreatePlayerSession::PATH,
+            jig::player::CreatePlayerSession::METHOD
+                .route()
+                .to(player::create_player_session),
+        )
+        .route(
             jig::player::GetPlayerSessionCode::PATH,
             jig::player::GetPlayerSessionCode::METHOD
                 .route()

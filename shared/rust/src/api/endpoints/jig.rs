@@ -146,7 +146,7 @@ impl ApiEndpoint for PlayCount {
     type Req = ();
     type Res = ();
     type Err = EmptyError;
-    const PATH: &'static str = "/v1/jig/{id}/view";
+    const PATH: &'static str = "/v1/jig/{id}/play-count";
     const METHOD: Method = Method::Post;
 }
 

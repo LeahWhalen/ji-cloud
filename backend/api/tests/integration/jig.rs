@@ -293,7 +293,7 @@ async fn count_play() -> anyhow::Result<()> {
     // TODO: post and then get and then test?
     let resp = client
         .post(&format!(
-            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/view",
+            "http://0.0.0.0:{}/v1/jig/0cc084bc-7c83-11eb-9f77-e3218dffb008/play-count",
             port
         ))
         .login()

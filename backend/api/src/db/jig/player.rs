@@ -89,6 +89,24 @@ values ($1, $2, $3, $4, $5, $6)
     }
 }
 
+/// Creates new jig player session for a player
+// TODO: Fixme
+pub async fn create_user_session(
+    db: &PgPool,
+    jig_id: JigId,
+    settings: JigPlayerSettings
+) -> Result<String, error::JigCode> {
+    let mut txn = db.begin().await?;
+
+    // first get the index (jig_session_id) based on the jig_id
+
+    // get the user agent header and ip address
+
+    // insert into the jig_player_session_instance table returning the instance_id
+
+    Ok(format!("hello world"))
+}
+
 /// Hashes a Uuid by
 /// 1. XORing every 2 bytes together as an i16,
 /// 2. clamping to within the digit requirement using mod (4 digits here),

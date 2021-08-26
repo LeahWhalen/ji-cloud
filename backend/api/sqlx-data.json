@@ -3212,6 +3212,18 @@
       ]
     }
   },
+  "98598b1e205261d9b5cfae051e7faba9ffbb8431d92ddd0373073bd826c32312": {
+    "query": "\ninsert into play_count (jig_id, play_count)\nvalues ($1, 0)\n        ",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "9baca0e0cc5e462bafb40e834a5c894d9f02dbb61ec75d81609cc32c946f5857": {
     "query": "select exists(select 1 from image_metadata where id = $1) as \"exists!\"",
     "describe": {
@@ -4261,6 +4273,26 @@
       },
       "nullable": [
         null
+      ]
+    }
+  },
+  "eee1207cdc926de955342d4fc7e247162b5dc9ba9dfb925ca3a5328c2aa7c794": {
+    "query": "\nupdate play_count\nset play_count = play_count + 1\nwhere jig_id = $1\nreturning play_count;\n            ",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "play_count",
+          "type_info": "Int8"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false
       ]
     }
   },

@@ -32,11 +32,26 @@ sqlx migrate run
 ```
 
 ##Reset database
+reset the database after creating/editing a database file
 ```bash
 sqlx db drop -y && sqlx db create && sqlx migrate run
 ```
 
-## How to test API after getting it to run locally
+Add final edits and save query data to sqlx-data.json in the current director
+```bash
+cargo sqlx prepare -- --lib
+cargo sqlx prepare -- --test integration
+```
+
+
+
+##How to test API after getting it to run locally
+if you haven't done so already, install cargo-insta. This will be used to keep track of database edits and changes in the tests.
+
+```bash
+cargo install cargo-insta
+```
+
 raise file descriptor limit on linux (optional - if OS error 24)
 ```bash
 ulimit -nH 65000
