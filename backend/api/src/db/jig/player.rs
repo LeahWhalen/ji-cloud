@@ -1,4 +1,5 @@
 use crate::error;
+use crate::extractor::IPAddress;
 use core::config::JIG_PLAYER_SESSION_CODE_MAX;
 use shared::domain::jig::player::JigPlayerSettings;
 use shared::domain::jig::{JigId, TextDirection};
@@ -94,17 +95,48 @@ values ($1, $2, $3, $4, $5, $6)
 pub async fn create_user_session(
     db: &PgPool,
     jig_id: JigId,
-    settings: JigPlayerSettings
+    settings: JigPlayerSettings,
+    ip_addr: IPAddress,
 ) -> Result<String, error::JigCode> {
     let mut txn = db.begin().await?;
 
     // first get the index (jig_session_id) based on the jig_id
+    // jig_player_session(index) where the jig_id
+    // TODO: make this a fetch_optional?
+    let jig_session_index = sqlx::query!(
+        //language=SQL
+        r#"
+select index
+from jig_player_session
+where jig_id = $1
+        "#,
+        jig_id.0
+    )
+    .fetch_one(db)
+    .await?;
 
     // get the user agent header and ip address
+    let ip_address = ip_addr.ip_addr;
+
+    let user_agent = ip_addr.user_agent;
 
     // insert into the jig_player_session_instance table returning the instance_id
+    let jig_player_session_instance_index = sqlx::query!(
+        //language=SQL
+        r#"
+insert into jig_player_session_instance (index, jig_id, ip_addr, user_agent)
+values ($1, $2, $3, $4)
+returning instance_id as "id: Uuid"
+"#,
+        jig_session_index.index,
+        jig_id.0,
+        ip_address,
+        user_agent
+    )
+        .fetch_one(&mut txn)
+        .await?;
 
-    Ok(format!("hello world"))
+    Ok( jig_player_session_instance_index.id.to_string() )
 }
 
 /// Hashes a Uuid by

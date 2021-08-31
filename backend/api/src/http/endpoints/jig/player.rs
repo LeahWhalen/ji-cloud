@@ -1,11 +1,12 @@
+use crate::{db, error, extractor::TokenUser};
+use actix_web::dev::ConnectionInfo;
+use chrono::{Duration, Utc};
+use core::settings::RuntimeSettings;
 use paperclip::actix::{
     api_v2_operation,
     web::{self, Data, Json},
     CreatedJson,
 };
-use sqlx::PgPool;
-use core::settings::RuntimeSettings;
-use crate::{db, error, extractor::TokenUser};
 use shared::{
     api::{endpoints::jig::player, ApiEndpoint},
     domain::jig::{
@@ -13,8 +14,9 @@ use shared::{
         JigId,
     },
 };
-use chrono::{Duration, Utc};
+use sqlx::PgPool;
 
+use crate::extractor::IPAddress;
 use crate::token::{create_auth_token, create_auth_token_no_cookie, generate_csrf};
 
 /// Create a jig player session for the author, if one does not exist already.
@@ -40,6 +42,7 @@ pub fn create_player_session(
     settings: Data<RuntimeSettings>,
     db: Data<PgPool>,
     claims: TokenUser,
+    ip_addr: IPAddress,
     req: Json<<player::CreatePlayerSession as ApiEndpoint>::Req>,
 ) -> Result<CreatedJson<<player::CreatePlayerSession as ApiEndpoint>::Res>, error::JigCode> {
     // Check to make sure user is authorized. Is this necessary?
@@ -47,18 +50,24 @@ pub fn create_player_session(
 
     db::jig::authz(&*db, claims.0.user_id, Some(req.jig_id.clone())).await?;
 
-    let session_id = db::jig::player::create_user_session(&db, req.jig_id, req.settings).await?;
+    let session_id =
+        db::jig::player::create_user_session(&db, req.jig_id, req.settings, ip_addr).await?;
     // Create a new row in ig_player_session_instance (return instance ID)
 
     // Generate a short-lived access token that will authenticate the next API
-    let session_duration = Duration::minutes(2);
+    let session_duration = Duration::minutes(20);
 
     let csrf = generate_csrf();
 
     let now = Utc::now();
 
-    let token: String =
-        create_auth_token_no_cookie(&settings.token_secret, session_duration, &session_id, csrf.clone(), now)?;
+    let token: String = create_auth_token_no_cookie(
+        &settings.token_secret,
+        session_duration,
+        &session_id,
+        csrf.clone(),
+        now,
+    )?;
 
     // this access token contains the "instance ID" -> subject
     // Return this access token

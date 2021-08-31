@@ -6,8 +6,10 @@ use crate::{
 };
 use actix_http::error::BlockingError;
 use actix_http::Payload;
+use actix_web::dev::ConnectionInfo;
 use actix_web::{
     cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage, HttpRequest,
+    HttpResponse, Responder,
 };
 use actix_web_httpauth::headers::authorization::{Authorization, Basic};
 use argon2::{
@@ -24,6 +26,7 @@ use shared::domain::{
     user::UserScope,
 };
 use sqlx::postgres::PgPool;
+use std::net::{IpAddr, SocketAddr};
 use std::{borrow::Cow, marker::PhantomData};
 use uuid::Uuid;
 
@@ -513,6 +516,50 @@ impl FromRequest for RequestOrigin {
             let origin = origin;
 
             Ok(Self { origin })
+        }
+        .boxed()
+        .into()
+    }
+}
+
+#[derive(Apiv2Schema)]
+#[openapi(
+    ip_addr,
+    alias = "ip_addr",
+    in = "header",
+    name = "IP Address",
+    description = "IP address and user-agent of requestor"
+)]
+// TODO: wrap this string in an option and rename this
+pub struct IPAddress {
+    pub ip_addr: String,
+    pub user_agent: Option<String>,
+}
+
+impl FromRequest for IPAddress {
+    type Error = actix_web::Error;
+    type Future = ReadyOrNot<'static, Result<Self, Self::Error>>;
+    type Config = ();
+    fn from_request(req: &HttpRequest, _payload: &mut Payload) -> Self::Future {
+        let val = req.connection_info();
+
+        let ip_addr = val.realip_remote_addr().unwrap().to_string();
+
+        let user_agent = req
+            .headers()
+            .get("User-Agent")
+            .map(|it| it.to_str().ok())
+            .flatten()
+            .map(ToOwned::to_owned);
+
+        async move {
+            let ip_addr = ip_addr;
+            let user_agent = user_agent;
+
+            Ok(Self {
+                ip_addr,
+                user_agent,
+            })
         }
         .boxed()
         .into()

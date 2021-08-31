@@ -59,6 +59,7 @@ pub struct JigPlayerSessionCreateRequest {
     pub jig_id: JigId,
     /// Settings for the session
     pub settings: JigPlayerSettings,
+
 }
 
 /// Response for creating or fetching the code associated with a jig.
