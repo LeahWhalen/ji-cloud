@@ -6,10 +6,8 @@ use crate::{
 };
 use actix_http::error::BlockingError;
 use actix_http::Payload;
-use actix_web::dev::ConnectionInfo;
 use actix_web::{
     cookie::Cookie, http::HeaderMap, web::Data, Either, FromRequest, HttpMessage, HttpRequest,
-    HttpResponse, Responder,
 };
 use actix_web_httpauth::headers::authorization::{Authorization, Basic};
 use argon2::{
@@ -26,7 +24,6 @@ use shared::domain::{
     user::UserScope,
 };
 use sqlx::postgres::PgPool;
-use std::net::{IpAddr, SocketAddr};
 use std::{borrow::Cow, marker::PhantomData};
 use uuid::Uuid;
 
@@ -565,3 +562,5 @@ impl FromRequest for IPAddress {
         .into()
     }
 }
+
+

@@ -40,7 +40,7 @@ bitflags::bitflags! {
     }
 }
 
-fn validate_token(
+pub fn validate_token(
     token_string: &str,
     footer: &str,
     token_key: &[u8; 32],

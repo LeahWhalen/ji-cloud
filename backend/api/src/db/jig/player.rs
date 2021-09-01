@@ -95,7 +95,6 @@ values ($1, $2, $3, $4, $5, $6)
 pub async fn create_user_session(
     db: &PgPool,
     jig_id: JigId,
-    settings: JigPlayerSettings,
     ip_addr: IPAddress,
 ) -> Result<String, error::JigCode> {
     let mut txn = db.begin().await?;
@@ -133,10 +132,10 @@ returning instance_id as "id: Uuid"
         ip_address,
         user_agent
     )
-        .fetch_one(&mut txn)
-        .await?;
+    .fetch_one(&mut txn)
+    .await?;
 
-    Ok( jig_player_session_instance_index.id.to_string() )
+    Ok(jig_player_session_instance_index.id.to_string())
 }
 
 /// Hashes a Uuid by

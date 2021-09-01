@@ -1,5 +1,4 @@
 use crate::{db, error, extractor::TokenUser};
-use actix_web::dev::ConnectionInfo;
 use chrono::{Duration, Utc};
 use core::settings::RuntimeSettings;
 use paperclip::actix::{
@@ -10,14 +9,14 @@ use paperclip::actix::{
 use shared::{
     api::{endpoints::jig::player, ApiEndpoint},
     domain::jig::{
-        player::{JigPlayerSession, JigPlayerSessionCode, JigPlayerSessionToken},
+        player::{JigPlayCount, JigPlayerSession, JigPlayerSessionCode, JigPlayerSessionToken},
         JigId,
     },
 };
 use sqlx::PgPool;
 
 use crate::extractor::IPAddress;
-use crate::token::{create_auth_token, create_auth_token_no_cookie, generate_csrf};
+use crate::token::{create_auth_token_no_cookie, generate_csrf, validate_token};
 
 /// Create a jig player session for the author, if one does not exist already.
 #[api_v2_operation]
@@ -50,12 +49,11 @@ pub fn create_player_session(
 
     db::jig::authz(&*db, claims.0.user_id, Some(req.jig_id.clone())).await?;
 
-    let session_id =
-        db::jig::player::create_user_session(&db, req.jig_id, req.settings, ip_addr).await?;
+    let session_id = db::jig::player::create_user_session(&db, req.jig_id, ip_addr).await?;
     // Create a new row in ig_player_session_instance (return instance ID)
 
     // Generate a short-lived access token that will authenticate the next API
-    let session_duration = Duration::minutes(20);
+    let session_duration = Duration::weeks(1);
 
     let csrf = generate_csrf();
 
@@ -73,6 +71,27 @@ pub fn create_player_session(
     // Return this access token
 
     Ok(CreatedJson(JigPlayerSessionToken { token }))
+}
+
+/// Create a jig player session for someone who's not the author, if one doesn't already exist
+/// todo: finish this route (make me async)
+#[api_v2_operation]
+pub fn complete_player_session(
+    settings: Data<RuntimeSettings>,
+    db: Data<PgPool>,
+    claims: TokenUser,
+    req: Json<<player::CompletePlayerSession as ApiEndpoint>::Req>,
+) -> Result<CreatedJson<<player::CompletePlayerSession as ApiEndpoint>::Res>, error::JigCode> {
+    // Check to make sure user is authorized. Is this necessary?
+    let req = req.into_inner();
+
+    db::jig::authz(&*db, claims.0.user_id, Some(req.jig_id.clone())).await?;
+
+    // todo make a token error
+    let token = validate_token(&req.token, "authorized", &settings.token_secret)
+        .expect("invalid player session token");
+
+    Ok(CreatedJson(JigPlayCount { play_count: 16 }))
 }
 
 /// Get the player session identified by the code, if it exists.

@@ -322,6 +322,12 @@ pub fn configure(cfg: &mut ServiceConfig<'_>) {
                 .to(player::get_code),
         )
         .route(
+            jig::player::CompletePlayerSession::PATH,
+            jig::player::CompletePlayerSession::METHOD
+                .route()
+                .to(player::complete_player_session),
+        )
+        .route(
             jig::draft::Create::PATH,
             jig::draft::Create::METHOD.route().to(create_draft),
         )
